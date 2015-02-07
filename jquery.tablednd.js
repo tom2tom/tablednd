@@ -104,11 +104,14 @@
       Replaced table-serialisers with map* funcs INCOMPATIBLE
 	  Fixed lint-identified issues
 	  Other minor bugfixes
+ 0.8: 2015-01-21
+	  Fix dropdown-editing in row
  */
 (function($) {
  $.extend({
   tableDnD: new function () {
 
+	var vers = $.fn.jquery;
 	// Class/public properties
 
 	this.defaults = {
@@ -148,7 +151,9 @@
 			// Pointer previous vert-position (for incremental calculations)
 			oldY: 0,
 			// Auto-scroll-timer id's
-			upid: 0, dnid: 0
+			upid: 0, dnid: 0,
+			// Whether using jquery >= 1.4, 1.7
+			jqge14: false, jqge17: false
 			// Defaults and/or runtime options also merged into here
 		};
 
@@ -190,8 +195,10 @@
 					}
 				}
 			}
+			cfg.jqge14 = (vers >= '1.4');
+			cfg.jqge17 = (vers >= '1.7');
 			// Arrange to handle some pointer-events in table bodies
-			if ($.fn.jquery >= '1.7') {
+			if (cfg.jqge17) {
 				$(this).on('mouseover.tdnd', 'tbody', cfg, ptrenter).on('mouseout.tdnd', 'tbody', cfg, ptrleave);
 			} else {
 				for (i = 0; i < bodies.length; i++) {
@@ -456,6 +463,9 @@
 			case 'tr':
 			 break;
 			case 'tbody':
+			case 'input':
+			case 'select':
+			case 'a':
 			 return false;
 			default:
 			 elem = $(elem).closest('td');
@@ -502,7 +512,7 @@
 	function ptrenter (ev) {
 		var cfg = ev.data;
 		if (!cfg.draqgging) {
-			if ($.fn.jquery >= '1.7') {
+			if (cfg.jqge17) {
 				$(this).on('mousemove.tdnd', cfg, pointermove);
 			} else {
 				$(this).bind('mousemove.tdnd', cfg, pointermove);
@@ -514,11 +524,10 @@
 	// Pointer-device-leave-tbody event handler
 	function ptrleave (ev) {
 		var $this = $(this);
-		var vers = $.fn.jquery;
 		var cfg = ev.data;
 		if (!cfg.dragging) {
 			cfg.currentTable.style.cursor = 'default';
-			if (vers >= '1.7') {
+			if (cfg.jqge17) {
 				$this.off('mousemove.tdnd', pointermove);
 			} else {
 				$this.unbind('mousemove.tdnd', pointermove);
@@ -526,7 +535,7 @@
 		}
 		if (cfg.bound)
 		{
-			if (vers >= '1.7') {
+			if (cfg.jqge17) {
 				$this.off('mousedown.tdnd', btndown).off('dblclick.tdnd', btnactivate);
 			} else {
 				$this.unbind ('mousedown.tdnd', btndown).unbind('dblclick.tdnd', btnactivate);
@@ -545,11 +554,10 @@
 				if (!cfg.bound)
 				{
 					cfg.currentTable.style.cursor = 'crosshair';
-					var vers = $.fn.jquery;
-					if (vers >= '1.7') {
+					if (cfg.jqge17) {
 						$this.on('mousedown.tdnd', cfg, btndown).on('dblclick.tdnd', cfg, btnactivate);
 					// Need jQuery 1.4+ for sorting when handling > 1 dragrow
-					} else if (vers >= '1.4') {
+					} else if (cfg.jqge14) {
 						$(this).bind('mousedown.tdnd', cfg, btndown).bind('dblclick.tdnd', cfg, btnactivate);
 					} else {
 						$(this).bind('mousedown.tdnd', cfg, btndown);
@@ -559,7 +567,7 @@
 			} else if (cfg.bound && !cfg.dragging) {
 				// Not dragging or draggable, but bound
 				cfg.currentTable.style.cursor = 'default';
-				if ($.fn.jquery >= '1.7') {
+				if (cfg.jqge17) {
 					$(this).off('mousedown.tdnd', btndown).off('dblclick.tdnd', btnactivate);
 				} else {
 					$(this).unbind('mousedown.tdnd', btndown).unbind('dblclick.tdnd', btnactivate);
@@ -767,7 +775,7 @@
 		cfg.prepare = true; // Initiate a drag, maybe
 		cfg.firstY = ptrCoords(ev).y;// Remember where we started
 		// Process button-releases anywhere, drags may end outside the table
-		if ($.fn.jquery >= '1.7') {
+		if (cfg.jqge17) {
 			$(document).on('mouseup.tdnd', cfg, btnup);
 		} else {
 			$(document).bind('mouseup.tdnd', cfg, btnup);
@@ -778,7 +786,7 @@
 	// Pointer-device-button-release-anywhere event handler (includes onDrop())
 	function btnup (ev) {
 		var cfg = ev.data;
-		if ($.fn.jquery >= '1.7') {
+		if (cfg.jqge17) {
 			$(document).off('mouseup.tdnd', btnup);
 		} else {
 			$(document).unbind('mouseup.tdnd', btnup);
