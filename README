@@ -1,0 +1,112 @@
+ TableDnD plug-in for JQuery, allows dragging and dropping table rows.
+ Derived from code by Denis Howlett <denish@isocra.com>
+ Copyright (C) 2014-2015 Tom Phane
+ Licensed under the GNU Affero GPL v.3 or, at the distributor's discretion, a later version.
+ See http://www.gnu.org/licenses#AGPL.
+
+ Example: apply dnd to object(s) having class 'table', with specified options
+  overriding corresponding defaults.
+
+ $('.table').tablednd({options});
+
+ Configuration options:
+
+ buttonState
+   String comprising acceptable drag-button-index, or combination thereof e.g. any of:
+   0,1,2,01,02,12,012
+   plus zero or more of 'shift', ctrl', alt', 'meta' (all lower-case). Default '' (i.e. anything)
+   Note: browser differences may be a problem (http://unixpapa.com/js/mouse.html)
+ containerID
+   Id of a scrollable div containing the draggable table. This div is scrolled when the drag
+   pointer is near the div's top or bottom. If not provided, the table's parent div, if that is
+   scrollable, will be used. Otherwise, the whole window is treated as the scrollable container.
+ dragHandle
+   Name of a class assigned to draggable cells, one or more of them in each row that is draggable.
+   If you specify this class, then only the rows containing those classed cells will be draggable.
+ dragClass
+   Name of class (or space-separated classes) added to the dragged row for the duration of
+   the drag, and then removed. Classing is more flexible than using dragStyles since it
+   can be inherited by the row cells and other content. The default class is tDnD_whileDrag.
+   So to use the default, simply customise this CSS class in your stylesheet.
+ dragStyles
+   A map of CSS style(s) applied to the dragged row during the drag. There are limitations
+   to the styles for a row (e.g. you can't assign a border -- well you can, but it won't be
+   displayed). (So instead consider using dragClass.) The map is as used in the jQuery
+   .css(...) function. Default = purple italic text
+ dropStyles
+   A map of CSS style(s) applied to the dragged row when it is dropped. Again, there are
+   limitations. The style(s) remain in effect. (So again, consider using dragClass
+   which is simply added and then removed on drop.)
+ onDrop
+   Name of a function to be called when the row is dropped. The function must take 2 parameters:
+   the table, and the array of row(s) that were dropped. You can work out the new order of the
+   rows by using table.rows.
+ onDragStart
+   Name of a function to be called when a drag starts. The function must take 2 parameters:
+   the table, and the array of row(s) which the user has started to drag.
+ onRowsChanged
+   Name of a function to be called after rows are reordered during a drag though the drag
+   has not yet ended. The function takes 3 parameters: the table, the array of row(s) that
+   were dropped, and the row upon which the drop occurred.
+ onAllowDrop
+   Name of a function to be called when drag-cursor is over a non-dragged row. The function
+   takes 2 parameters: the array of dragged row(s), and the row under the cursor. The function
+   must return true if the dragged row(s) may be dropped there, or else false.
+ filterRegexp
+   Regular expression used to decide which rows to include when mapping a table. Default: null
+
+ Other ways to control behaviour:
+
+ Apply class "nodrag" to each row which may not be dragged.
+   By itself, this doesn't achieve much, as dragging other rows can change the order anyhow.
+   Perhaps useful for first and last rows.
+ Apply class "nodrop" to each row onto which dropping is not permitted, and/or which may not
+   be re-positioned as a result of dropping elsewhere.
+
+ Inside the onDrop method you can call function map(table) which returns an object that can
+ be sent to the server. No descending is done when interrogating the table, so this only
+ suits relatively simple tables. The returned object is js-map-like:
+  {rid1:{cid1:val,cid2:val...},rid2:{cid1:val,cid2:val...}...}
+ The keys are the id of the corresponding tr/td, or if no id, then its name, or if none,
+ a string like 'rowN' or 'colN' where the N is a 1-based index
+ The values are: '<empty>', or a single value, or a map of values {0:val1,1:val2....}
+
+ Public methods:
+
+ $.tableDnD.mapTable(table)
+   Maps table in the manner described above
+
+ Known problems:
+
+ Version history:
+ 0.2-0.5: 2008
+      Releases by Denis Howlett
+ 0.6: 2011-10-16
+      Fork
+      Added checks for suitable element-types
+      Added real support for multiple <tbody> elements in a table
+      Added support for multi-selection (only for jQuery >= 1.4 and browsers that provide dblclick events)
+      Reduced no. of events processed
+      Added support for specific buttons and states
+      Tolerate pointer 'jiggle' e.g. from in-cell click without triggering a drag
+      Un-dragged rows classed "nodrop" treated as "fixed position", regardless of where drop occurs
+      During drags, apply dragStyles (if it exists) before, not instead of, dragClass if that exists
+      Added support for onRowsChanged callback
+      Added missing default onAllowDrop
+      Removed redundant scrollAmount parameter
+      Removed unused default serializeParamName
+      Removed redundant updateTables()
+      (Hopefully, not much tested) improved browser compatibility
+ 0.6.1: 2012-08-10
+      Also work with later jquery
+      Fix input-editing in clicked row
+ 0.7: 2014-05-28
+      Revise plugin structure
+	  Rationalise 'on*' style- and class-parameter names INCOMPATIBLE
+      Apply dragStyles after, not before, dragClass
+      Also work with later jquery
+      Replaced table-serialisers with map* funcs INCOMPATIBLE
+	  Fixed lint-identified issues
+	  Other minor bugfixes
+ 0.8: 2015-01-21
+	  Fix dropdown-editing in row
