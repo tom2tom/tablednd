@@ -1,9 +1,14 @@
+/*!
+TableDnD plug-in for JQuery
+Version 0.8
+Copyright (C) 2014-2015 Tom Phane
+Licensed under the GNU Affero GPL v.3 or, at the distributor's discretion, a later version.
+See http://www.gnu.org/licenses#AGPL.
+*/
 /**
- TableDnD plug-in for JQuery, allows dragging and dropping table rows.
  Derived from code by Denis Howlett <denish@isocra.com>
- Copyright (C) 2014 Tom Phane
- Licensed under the GNU Affero GPL v.3 or, at the distributor's discretion, a later version.
- See http://www.gnu.org/licenses#AGPL.
+
+ Allows dragging and dropping table rows.
 
  Configuration options:
 
