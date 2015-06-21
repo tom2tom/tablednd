@@ -1,6 +1,7 @@
 /*!
 TableDnD plug-in for JQuery
-Version 0.8
+Version 0.8.1
+* 
 Copyright (C) 2014-2015 Tom Phane
 Licensed under the GNU Affero GPL v.3 or, at the distributor's discretion, a later version.
 See http://www.gnu.org/licenses#AGPL.
@@ -111,6 +112,8 @@ See http://www.gnu.org/licenses#AGPL.
 	  Other minor bugfixes
  0.8: 2015-01-21
 	  Fix dropdown-editing in row
+ 0.8.1: 2015-06-20
+	  Fix event connection for jq > 1.7
  */
 (function($) {
  $.extend({
@@ -200,8 +203,8 @@ See http://www.gnu.org/licenses#AGPL.
 					}
 				}
 			}
-			cfg.jqge14 = (vers >= '1.4');
-			cfg.jqge17 = (vers >= '1.7');
+			cfg.jqge17 = versionCompare(vers,'1.7') >= 0;
+			cfg.jqge14 = cfg.jqge17 || versionCompare(vers,'1.4') >= 0;
 			// Arrange to handle some pointer-events in table bodies
 			if (cfg.jqge17) {
 				$(this).on('mouseover.tdnd', 'tbody', cfg, ptrenter).on('mouseout.tdnd', 'tbody', cfg, ptrleave);
@@ -560,7 +563,7 @@ See http://www.gnu.org/licenses#AGPL.
 				{
 					cfg.currentTable.style.cursor = 'crosshair';
 					if (cfg.jqge17) {
-						$this.on('mousedown.tdnd', cfg, btndown).on('dblclick.tdnd', cfg, btnactivate);
+						$(this).on('mousedown.tdnd', cfg, btndown).on('dblclick.tdnd', cfg, btnactivate);
 					// Need jQuery 1.4+ for sorting when handling > 1 dragrow
 					} else if (cfg.jqge14) {
 						$(this).bind('mousedown.tdnd', cfg, btndown).bind('dblclick.tdnd', cfg, btnactivate);
@@ -860,6 +863,33 @@ See http://www.gnu.org/licenses#AGPL.
 			showDrag (data.ob, cfg);
 		}
 		return false; // Prevent unwanted text selection
+	}
+	
+	/*
+	 * @author Alexey Bass (albass)
+	 * @since 2011-07-14
+	 * Returns:
+	 * -1 if left is LOWER than right
+	 *  0 if they are equal
+	 *  1 if left is GREATER aka right is LOWER
+	 *  FALSE if left or right is not valid
+	 */
+	versionCompare = function(left, right) {
+		if (typeof left + typeof right != 'stringstring')
+			return false;
+		
+		var a = left.split('.'),
+			b = right.split('.'),
+			i = 0, len = Math.max(a.length, b.length);
+			
+		for (; i < len; i++) {
+			if ((a[i] && !b[i] && parseInt(a[i]) > 0) || (parseInt(a[i]) > parseInt(b[i]))) {
+				return 1;
+			} else if ((b[i] && !a[i] && parseInt(b[i]) > 0) || (parseInt(a[i]) < parseInt(b[i]))) {
+				return -1;
+			}
+		}
+		return 0;
 	}
   }
  });
