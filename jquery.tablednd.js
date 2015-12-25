@@ -115,7 +115,7 @@ See http://www.gnu.org/licenses#AGPL.
  0.8.1: 2015-06-20
 	  Fix event connection for jq > 1.7
  */
-(function($) {
+(function($) { "$:nomunge";
  $.extend({
   tableDnD: new function () {
 
